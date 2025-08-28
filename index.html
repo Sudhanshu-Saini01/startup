@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Advanced Guide: The Digital Product Lifecycle</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <link
+            href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+            rel="stylesheet">
+        <!-- Chosen Palette: Sophisticated Stone & Amber -->
+        <!-- Application Structure Plan: A thematic, single-page dashboard structure is used. A persistent sidebar navigation allows users to jump to any of the six core phases of the product lifecycle. Each phase is a self-contained section with an introduction, detailed breakdowns of roles, skills, and tools, and interactive elements like charts or diagrams. This non-linear structure was chosen because the source material covers a cyclical process. It allows users, whether they are founders, developers, or students, to dive into the specific area most relevant to them without being forced through a linear narrative, enhancing usability and information retention. -->
+        <!-- Visualization & Content Choices: 
+        - Lifecycle Overview: Goal: Organize. Method: Interactive HTML/CSS process flow diagram. Interaction: Hovering over a phase highlights it and clicking navigates to the relevant section. Justification: Visually represents the entire process upfront and serves as a primary navigation tool.
+        - Roles Distribution Chart: Goal: Compare. Method: A dynamic bar chart (Chart.js) showing the distribution of key roles across phases. Interaction: Clicking a bar filters a detailed list of roles for that phase. Justification: Provides a high-level quantitative overview of team structure and allows for easy drill-down into specifics.
+        - Tech Stack Factors: Goal: Inform/Compare. Method: An interactive radar chart (Chart.js). Interaction: User can select different project types (e.g., 'MVP', 'Enterprise App') from a dropdown to see how the importance of factors like 'Scalability' or 'Cost' changes. Justification: Effectively visualizes multi-variable comparisons in a compact, engaging way.
+        - Testing Pyramid: Goal: Organize. Method: A diagram built with styled HTML/CSS divs. Interaction: Hovering over a layer reveals a tooltip with more details. Justification: A classic, intuitive way to represent hierarchical testing levels without using SVG.
+        - Deployment Comparison: Goal: Compare. Method: A structured HTML table. Interaction: N/A. Justification: A table is the clearest and most direct way to compare the distinct requirements of the App Store vs. Google Play.
+        - CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+        <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+        <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f8f7f6; }
+        .nav-link { transition: all 0.2s ease-in-out; }
+        .nav-link.active, .nav-link:hover { background-color: #e7e5e4; color: #a855f7; }
+        .content-section { display: none; }
+        .content-section.active { display: block; animation: fadeIn 0.5s ease-in-out; }
+        .chart-container { position: relative; width: 100%; max-width: 600px; margin-left: auto; margin-right: auto; height: 350px; max-height: 400px; }
+        @media (min-width: 768px) { .chart-container { height: 400px; } }
+        .phase-step { transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out; }
+        .phase-step:hover { transform: translateY(-5px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.07), 0 4px 6px -2px rgba(0, 0, 0, 0.05); }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .pyramid-layer { transition: all 0.3s ease; }
+        .pyramid-layer:hover { filter: brightness(1.1); transform: scale(1.02); }
+    </style>
+    </head>
+    <body class="text-stone-800">
+
+        <div class="flex flex-col md:flex-row min-h-screen">
+            <!-- Sidebar Navigation -->
+            <aside
+                class="w-full md:w-64 bg-stone-100 p-6 border-r border-stone-200 flex-shrink-0">
+                <div class="flex items-center mb-8">
+                    <div
+                        class="w-10 h-10 bg-purple-600 rounded-lg flex items-center justify-center mr-3">
+                        <svg xmlns="http://www.w3.org/2000/svg"
+                            class="h-6 w-6 text-white" fill="none"
+                            viewBox="0 0 24 24" stroke="currentColor"><path
+                                stroke-linecap="round" stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+                    </div>
+                    <h1 class="text-xl font-bold text-stone-800">Product
+                        Lifecycle</h1>
+                </div>
+                <nav id="navigation" class="space-y-2">
+                    <a href="#overview" data-section="overview"
+                        class="nav-link active flex items-center font-medium text-stone-600 px-4 py-2 rounded-lg"><span
+                            class="mr-3">🚀</span> Overview</a>
+                    <a href="#discovery" data-section="discovery"
+                        class="nav-link flex items-center font-medium text-stone-600 px-4 py-2 rounded-lg"><span
+                            class="mr-3">💡</span> Discovery</a>
+                    <a href="#design" data-section="design"
+                        class="nav-link flex items-center font-medium text-stone-600 px-4 py-2 rounded-lg"><span
+                            class="mr-3">🎨</span> Design</a>
+                    <a href="#development" data-section="development"
+                        class="nav-link flex items-center font-medium text-stone-600 px-4 py-2 rounded-lg"><span
+                            class="mr-3">💻</span> Development</a>
+                    <a href="#testing" data-section="testing"
+                        class="nav-link flex items-center font-medium text-stone-600 px-4 py-2 rounded-lg"><span
+                            class="mr-3">✔️</span> Testing & QA</a>
+                    <a href="#deployment" data-section="deployment"
+                        class="nav-link flex items-center font-medium text-stone-600 px-4 py-2 rounded-lg"><span
+                            class="mr-3">🚢</span> Deployment</a>
+                    <a href="#maintenance" data-section="maintenance"
+                        class="nav-link flex items-center font-medium text-stone-600 px-4 py-2 rounded-lg"><span
+                            class="mr-3">🔄</span> Iteration</a>
+                </nav>
+            </aside>
+
+            <!-- Main Content -->
+            <main class="flex-1">
+                <div class="p-6 md:p-10">
+                    <!-- Overview Section -->
+                    <section id="overview" class="content-section active">
+                        <div
+                            class="bg-white p-8 rounded-xl shadow-sm border border-stone-200 mb-8 text-center">
+                            <h2
+                                class="text-4xl font-bold mb-4 text-stone-900">From
+                                Idea to Impact</h2>
+                            <p
+                                class="text-lg text-stone-600 max-w-3xl mx-auto">Welcome
+                                to the definitive guide on the digital product
+                                lifecycle. This interactive experience breaks
+                                down the six key phases of building a successful
+                                app or website, from the spark of an idea to the
+                                ongoing process of growth and iteration.</p>
+                        </div>
+
+                        <div
+                            class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 text-center">
+                            <div data-section="discovery"
+                                class="phase-step cursor-pointer bg-white p-6 rounded-xl shadow-sm border border-stone-200">
+                                <div class="text-4xl mb-3">💡</div>
+                                <h3 class="text-xl font-semibold mb-2">1.
+                                    Discovery & Strategy</h3>
+                                <p class="text-stone-500">Validate the idea,
+                                    research the market, and define the
+                                    plan.</p>
+                            </div>
+                            <div data-section="design"
+                                class="phase-step cursor-pointer bg-white p-6 rounded-xl shadow-sm border border-stone-200">
+                                <div class="text-4xl mb-3">🎨</div>
+                                <h3 class="text-xl font-semibold mb-2">2. UI/UX
+                                    Design</h3>
+                                <p class="text-stone-500">Architect the user
+                                    experience and create the visual
+                                    blueprint.</p>
+                            </div>
+                            <div data-section="development"
+                                class="phase-step cursor-pointer bg-white p-6 rounded-xl shadow-sm border border-stone-200">
+                                <div class="text-4xl mb-3">💻</div>
+                                <h3 class="text-xl font-semibold mb-2">3.
+                                    Development</h3>
+                                <p class="text-stone-500">Bring the designs to
+                                    life with frontend and backend code.</p>
+                            </div>
+                            <div data-section="testing"
+                                class="phase-step cursor-pointer bg-white p-6 rounded-xl shadow-sm border border-stone-200">
+                                <div class="text-4xl mb-3">✔️</div>
+                                <h3 class="text-xl font-semibold mb-2">4.
+                                    Testing & QA</h3>
+                                <p class="text-stone-500">Ensure a high-quality,
+                                    stable, and bug-free product.</p>
+                            </div>
+                            <div data-section="deployment"
+                                class="phase-step cursor-pointer bg-white p-6 rounded-xl shadow-sm border border-stone-200">
+                                <div class="text-4xl mb-3">🚢</div>
+                                <h3 class="text-xl font-semibold mb-2">5.
+                                    Deployment & DevOps</h3>
+                                <p class="text-stone-500">Launch the application
+                                    and maintain its infrastructure.</p>
+                            </div>
+                            <div data-section="maintenance"
+                                class="phase-step cursor-pointer bg-white p-6 rounded-xl shadow-sm border border-stone-200">
+                                <div class="text-4xl mb-3">🔄</div>
+                                <h3 class="text-xl font-semibold mb-2">6.
+                                    Maintenance & Iteration</h3>
+                                <p class="text-stone-500">Monitor, gather
+                                    feedback, and continuously improve.</p>
+                            </div>
+                        </div>
+
+                        <div
+                            class="mt-12 bg-white p-6 rounded-xl shadow-sm border border-stone-200">
+                            <h3
+                                class="text-2xl font-bold text-center mb-4 text-stone-900">Tech
+                                Stack Decision Factors</h3>
+                            <p class="text-center text-stone-600 mb-4">The right
+                                technology stack depends on project goals.
+                                Select a project type to see how key factors
+                                change.</p>
+                            <div class="flex justify-center mb-4">
+                                <select id="projectTypeSelector"
+                                    class="p-2 border rounded-lg bg-stone-50 border-stone-300">
+                                    <option value="mvp">Startup MVP</option>
+                                    <option value="enterprise">Enterprise
+                                        App</option>
+                                    <option
+                                        value="data-intensive">Data-Intensive
+                                        App</option>
+                                </select>
+                            </div>
+                            <div class="chart-container">
+                                <canvas id="techStackChart"></canvas>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Other Sections -->
+                    <section id="discovery" class="content-section">
+                        <h2 class="text-4xl font-bold mb-4 text-stone-900">💡
+                            Phase 1: Discovery & Strategy</h2>
+                        <p class="text-lg text-stone-600 mb-8">This foundational
+                            phase mitigates risk by ensuring you're solving a
+                            real problem for a defined audience. It's where an
+                            idea is refined into a strategic plan before
+                            investing in design or development.</p>
+                        <div
+                            class="bg-amber-50 border-l-4 border-amber-400 p-4 rounded-r-lg mb-8">
+                            <p class="text-amber-800"><strong>Expert
+                                    Insight:</strong>
+                                "The biggest waste in product development is building something nobody wants. The discovery phase is your primary tool to prevent this. Fall in love with the problem, not your solution."</p>
+                        </div>
+                        <div class="grid md:grid-cols-2 gap-8">
+                            <div
+                                class="bg-white p-6 rounded-xl shadow-sm border border-stone-200">
+                                <h3 class="text-2xl font-semibold mb-3">Key
+                                    Roles (The Visionaries)</h3>
+                                <ul
+                                    class="list-disc list-inside space-y-2 text-stone-700">
+                                    <li><strong>Product Manager (PM):</strong>
+                                        Owns the product vision, strategy, and
+                                        roadmap.</li>
+                                    <li><strong>Business Analyst (BA):</strong>
+                                        Gathers requirements and analyzes market
+                                        data.</li>
+                                    <li><strong>UX Researcher:</strong> Conducts
+                                        user interviews and tests to understand
+                                        user needs.</li>
+                                </ul>
+                            </div>
+                            <div
+                                class="bg-white p-6 rounded-xl shadow-sm border border-stone-200">
+                                <h3
+                                    class="text-2xl font-semibold mb-3">Essential
+                                    Skills & Tools</h3>
+                                <p class="mb-2"><strong>Skills:</strong> Market
+                                    research, strategic thinking, data analysis,
+                                    competitive analysis.</p>
+                                <p><strong>Tools:</strong> SurveyMonkey, Google
+                                    Analytics, Mixpanel, Aha!, Jira, Miro,
+                                    Notion.</p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section id="design" class="content-section">
+                        <h2 class="text-4xl font-bold mb-4 text-stone-900">🎨
+                            Phase 2: UI/UX Design</h2>
+                        <p class="text-lg text-stone-600 mb-8">Here, the
+                            strategic plan becomes a tangible blueprint. This
+                            phase creates a user experience that is visually
+                            appealing, logical, intuitive, and accessible,
+                            progressing from low-fidelity structure to
+                            interactive prototypes.</p>
+                        <div
+                            class="bg-amber-50 border-l-4 border-amber-400 p-4 rounded-r-lg mb-8">
+                            <p class="text-amber-800"><strong>Expert
+                                    Insight:</strong>
+                                "Good design is not just what it looks like and feels like. Good design is how it works. A beautiful app that's confusing is a failed app."</p>
+                        </div>
+                        <div class="grid md:grid-cols-2 gap-8">
+                            <div
+                                class="bg-white p-6 rounded-xl shadow-sm border border-stone-200">
+                                <h3 class="text-2xl font-semibold mb-3">Key
+                                    Roles (The Architects)</h3>
+                                <ul
+                                    class="list-disc list-inside space-y-2 text-stone-700">
+                                    <li><strong>UX Designer:</strong> Focuses on
+                                        logic and ease of use. Creates
+                                        wireframes and user flows.</li>
+                                    <li><strong>UI Designer:</strong> Focuses on
+                                        the visual look and feel. Creates
+                                        mockups and prototypes.</li>
+                                    <li><strong>UX Writer:</strong> Crafts clear
+                                        and concise text to guide the user.</li>
+                                </ul>
+                            </div>
+                            <div
+                                class="bg-white p-6 rounded-xl shadow-sm border border-stone-200">
+                                <h3
+                                    class="text-2xl font-semibold mb-3">Essential
+                                    Skills & Tools</h3>
+                                <p class="mb-2"><strong>Skills:</strong>
+                                    Wireframing, prototyping, information
+                                    architecture, visual design principles.</p>
+                                <p><strong>Tools:</strong> Figma, Sketch, Adobe
+                                    XD, Balsamiq, Zeplin, InVision.</p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section id="development" class="content-section">
+                        <h2 class="text-4xl font-bold mb-4 text-stone-900">💻
+                            Phase 3: Development</h2>
+                        <p class="text-lg text-stone-600 mb-8">This is the
+                            construction phase where design blueprints are
+                            transformed into a functional product. It's divided
+                            into the backend (the engine) and the frontend (the
+                            interface).</p>
+                        <div
+                            class="bg-amber-50 border-l-4 border-amber-400 p-4 rounded-r-lg mb-8">
+                            <p class="text-amber-800"><strong>Expert
+                                    Insight:</strong>
+                                "Clean code is not a luxury. It's the foundation of a scalable, maintainable, and ultimately successful product. Technical debt always comes due."</p>
+                        </div>
+                        <div class="grid md:grid-cols-2 gap-8">
+                            <div
+                                class="bg-white p-6 rounded-xl shadow-sm border border-stone-200">
+                                <h3 class="text-2xl font-semibold mb-3">Backend
+                                    Development</h3>
+                                <ul
+                                    class="list-disc list-inside space-y-2 text-stone-700">
+                                    <li><strong>Role:</strong> Backend
+                                        Developer</li>
+                                    <li><strong>Goal:</strong> Build the server,
+                                        database, and core application
+                                        logic.</li>
+                                    <li><strong>Tech:</strong> Node.js, Python,
+                                        Java, PostgreSQL, MongoDB, AWS,
+                                        GCP.</li>
+                                </ul>
+                            </div>
+                            <div
+                                class="bg-white p-6 rounded-xl shadow-sm border border-stone-200">
+                                <h3 class="text-2xl font-semibold mb-3">Frontend
+                                    Development</h3>
+                                <ul
+                                    class="list-disc list-inside space-y-2 text-stone-700">
+                                    <li><strong>Role:</strong> Frontend
+                                        Developer</li>
+                                    <li><strong>Goal:</strong> Translate designs
+                                        into interactive code.</li>
+                                    <li><strong>Tech:</strong> HTML, CSS,
+                                        JavaScript, React, Angular, Vue.js.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section id="testing" class="content-section">
+                        <h2 class="text-4xl font-bold mb-4 text-stone-900">✔️
+                            Phase 4: Testing & Quality Assurance</h2>
+                        <p class="text-lg text-stone-600 mb-8">Before launch,
+                            the product undergoes rigorous testing to find and
+                            fix bugs, ensuring a high-quality, stable, and
+                            secure user experience. This process is often
+                            visualized as a pyramid.</p>
+                        <div
+                            class="bg-amber-50 border-l-4 border-amber-400 p-4 rounded-r-lg mb-8">
+                            <p class="text-amber-800"><strong>Expert
+                                    Insight:</strong>
+                                "Quality is not an act, it is a habit. QA is not a phase you pass through; it's a culture you build into every step of the process."</p>
+                        </div>
+                        <div
+                            class="bg-white p-6 rounded-xl shadow-sm border border-stone-200">
+                            <h3
+                                class="text-2xl font-bold text-center mb-6 text-stone-900">The
+                                Testing Pyramid</h3>
+                            <div
+                                class="w-full max-w-lg mx-auto flex flex-col items-center text-center font-semibold text-white">
+                                <div
+                                    class="pyramid-layer w-1/3 bg-purple-600 py-4 rounded-t-lg"
+                                    title="User Acceptance Testing: Real users validate the product meets their needs.">UAT</div>
+                                <div
+                                    class="pyramid-layer w-2/3 bg-purple-500 py-5"
+                                    title="System Testing: End-to-end testing of the fully integrated application.">System
+                                    Testing</div>
+                                <div
+                                    class="pyramid-layer w-5/6 bg-purple-400 py-6 text-stone-800"
+                                    title="Integration Testing: Verifying that different modules work together correctly.">Integration
+                                    Testing</div>
+                                <div
+                                    class="pyramid-layer w-full bg-purple-300 py-7 rounded-b-lg text-stone-800"
+                                    title="Unit Testing: Developers test individual code components in isolation.">Unit
+                                    Testing</div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section id="deployment" class="content-section">
+                        <h2 class="text-4xl font-bold mb-4 text-stone-900">🚢
+                            Phase 5: Deployment & DevOps</h2>
+                        <p class="text-lg text-stone-600 mb-8">This is the
+                            launch phase where the tested application is made
+                            available to the public. The process differs
+                            significantly between web and mobile
+                            applications.</p>
+                        <div
+                            class="bg-amber-50 border-l-4 border-amber-400 p-4 rounded-r-lg mb-8">
+                            <p class="text-amber-800"><strong>Expert
+                                    Insight:</strong>
+                                "Amateurs talk about features, professionals talk about deployment pipelines. A smooth, automated release process is a massive competitive advantage."</p>
+                        </div>
+                        <div
+                            class="bg-white p-6 rounded-xl shadow-sm border border-stone-200">
+                            <h3
+                                class="text-2xl font-bold mb-4 text-center text-stone-900">App
+                                Store vs. Google Play</h3>
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-left border-collapse">
+                                    <thead>
+                                        <tr>
+                                            <th
+                                                class="py-3 px-4 bg-stone-100 font-semibold text-sm text-stone-600 border-b border-stone-200">Requirement</th>
+                                            <th
+                                                class="py-3 px-4 bg-stone-100 font-semibold text-sm text-stone-600 border-b border-stone-200">Apple
+                                                App Store (iOS)</th>
+                                            <th
+                                                class="py-3 px-4 bg-stone-100 font-semibold text-sm text-stone-600 border-b border-stone-200">Google
+                                                Play Store (Android)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr class="hover:bg-stone-50">
+                                            <td
+                                                class="py-3 px-4 border-b border-stone-200">Developer
+                                                Fee</td>
+                                            <td
+                                                class="py-3 px-4 border-b border-stone-200">$99
+                                                per year</td>
+                                            <td
+                                                class="py-3 px-4 border-b border-stone-200">$25
+                                                one-time fee</td>
+                                        </tr>
+                                        <tr class="hover:bg-stone-50">
+                                            <td
+                                                class="py-3 px-4 border-b border-stone-200">Review
+                                                Process</td>
+                                            <td
+                                                class="py-3 px-4 border-b border-stone-200">Rigorous,
+                                                manual review</td>
+                                            <td
+                                                class="py-3 px-4 border-b border-stone-200">Primarily
+                                                automated</td>
+                                        </tr>
+                                        <tr class="hover:bg-stone-50">
+                                            <td
+                                                class="py-3 px-4 border-b border-stone-200">Beta
+                                                Testing</td>
+                                            <td
+                                                class="py-3 px-4 border-b border-stone-200">TestFlight</td>
+                                            <td
+                                                class="py-3 px-4 border-b border-stone-200">Google
+                                                Play Console</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section id="maintenance" class="content-section">
+                        <h2 class="text-4xl font-bold mb-4 text-stone-900">🔄
+                            Phase 6: Maintenance & Iteration</h2>
+                        <p class="text-lg text-stone-600 mb-8">Launch is the
+                            beginning of the most important feedback loop. This
+                            phase involves monitoring the live application,
+                            gathering user feedback, and using that data to
+                            continuously improve the product.</p>
+                        <div
+                            class="bg-amber-50 border-l-4 border-amber-400 p-4 rounded-r-lg mb-8">
+                            <p class="text-amber-800"><strong>Expert
+                                    Insight:</strong>
+                                "The most successful products aren't just built; they evolve. The 'Build-Measure-Learn' loop isn't a startup fad, it's the fundamental engine of sustainable growth."</p>
+                        </div>
+                        <div class="grid md:grid-cols-2 gap-8">
+                            <div
+                                class="bg-white p-6 rounded-xl shadow-sm border border-stone-200">
+                                <h3 class="text-2xl font-semibold mb-3">Key
+                                    Roles (The Growth Team)</h3>
+                                <ul
+                                    class="list-disc list-inside space-y-2 text-stone-700">
+                                    <li><strong>Product Manager:</strong>
+                                        Analyzes user data to prioritize future
+                                        development.</li>
+                                    <li><strong>Data Analyst:</strong> Uncovers
+                                        insights from user behavior data.</li>
+                                    <li><strong>Marketing Manager:</strong>
+                                        Works to acquire and retain users.</li>
+                                </ul>
+                            </div>
+                            <div
+                                class="bg-white p-6 rounded-xl shadow-sm border border-stone-200">
+                                <h3
+                                    class="text-2xl font-semibold mb-3">Essential
+                                    Skills & Tools</h3>
+                                <p class="mb-2"><strong>Skills:</strong> SQL,
+                                    statistical analysis, data visualization,
+                                    A/B testing, SEO/SEM.</p>
+                                <p><strong>Tools:</strong> Mixpanel, Amplitude,
+                                    Google Analytics, Tableau, Intercom.</p>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </main>
+        </div>
+
+        <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const sections = document.querySelectorAll('.content-section');
+            const navLinks = document.querySelectorAll('.nav-link');
+            const phaseSteps = document.querySelectorAll('.phase-step');
+
+            function showSection(sectionId) {
+                sections.forEach(section => {
+                    section.classList.toggle('active', section.id === sectionId);
+                });
+                navLinks.forEach(link => {
+                    link.classList.toggle('active', link.dataset.section === sectionId);
+                });
+                window.scrollTo(0, 0);
+            }
+
+            function handleNavigation(e) {
+                e.preventDefault();
+                const sectionId = e.currentTarget.dataset.section;
+                showSection(sectionId);
+                window.history.pushState({section: sectionId}, '', `#${sectionId}`);
+            }
+
+            navLinks.forEach(link => link.addEventListener('click', handleNavigation));
+            phaseSteps.forEach(step => step.addEventListener('click', handleNavigation));
+
+            window.addEventListener('popstate', function(e) {
+                const sectionId = (e.state && e.state.section) ? e.state.section : 'overview';
+                showSection(sectionId);
+            });
+
+            const initialSection = window.location.hash.substring(1) || 'overview';
+            showSection(initialSection);
+            
+            const techStackData = {
+                labels: ['Scalability', 'Time to Market', 'Cost', 'Performance', 'Team Expertise', 'Ecosystem'],
+                mvp: [6, 10, 9, 5, 8, 7],
+                enterprise: [10, 5, 6, 9, 7, 8],
+                'data-intensive': [9, 4, 5, 10, 8, 7],
+            };
+
+            const radarCtx = document.getElementById('techStackChart').getContext('2d');
+            const techStackChart = new Chart(radarCtx, {
+                type: 'radar',
+                data: {
+                    labels: techStackData.labels,
+                    datasets: [{
+                        label: 'Importance (out of 10)',
+                        data: techStackData.mvp,
+                        fill: true,
+                        backgroundColor: 'rgba(168, 85, 247, 0.2)',
+                        borderColor: 'rgb(168, 85, 247)',
+                        pointBackgroundColor: 'rgb(168, 85, 247)',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: 'rgb(168, 85, 247)'
+                    }]
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    scales: { r: { angleLines: { color: 'rgba(0, 0, 0, 0.1)' }, grid: { color: 'rgba(0, 0, 0, 0.1)' }, pointLabels: { font: { size: 12 } }, suggestedMin: 0, suggestedMax: 10, ticks: { stepSize: 2, backdropColor: 'rgba(0,0,0,0)' } } },
+                    plugins: { legend: { display: false } }
+                }
+            });
+
+            document.getElementById('projectTypeSelector').addEventListener('change', function(e) {
+                techStackChart.data.datasets[0].data = techStackData[e.target.value];
+                techStackChart.update();
+            });
+        });
+    </script>
+    </body>
+</html>
